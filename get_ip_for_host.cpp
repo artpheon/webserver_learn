@@ -1,9 +1,4 @@
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <iostream>
-#include <iomanip>
-#include <cstdlib>
+#include "header.hpp"
 
 using namespace std;
 
