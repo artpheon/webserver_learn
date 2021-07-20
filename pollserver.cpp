@@ -60,12 +60,17 @@ void *getInAddr(struct sockaddr *sa) {
 void addToPFDS(struct pollfd** pfds, int newfd, int *fdCount, int* fdSize) {
     if (*fdCount == *fdSize) {
         *fdSize *= 2;
-        *pfds = static_cast<struct pollfd*>(realloc(*pfds, sizeof(struct pollfd) * *fdSize));
+        *pfds = static_cast<struct pollfd*>(realloc(*pfds, sizeof(**pfds) * *fdSize));
     }
 
     (*pfds)[*fdCount].fd = newfd;
     (*pfds)[*fdCount].events = POLLIN;
     ++(*fdCount);
+}
+
+void    delFromPFDS(struct pollfd pfds[], int i, int* fdCount) {
+    pfds[i] = pfds[*fdCount - 1];
+    (*fdCount) -= 1;
 }
 
 int main() {
@@ -77,7 +82,7 @@ int main() {
 
     int fdCount = 0;
     int fdSize = 5;
-    struct pollfd* pfds = static_cast<struct pollfd*>(malloc(sizeof(pollfd) * fdSize));
+    struct pollfd* pfds = static_cast<struct pollfd*>(malloc(sizeof(*pfds) * fdSize));
 
     listener = getListenerSocket();
     if (listener == -1) {
@@ -90,7 +95,7 @@ int main() {
 
     for(;;) {
         int pollCount = poll(pfds, fdCount, -1);
-        if (pollCount) {
+        if (pollCount == -1) {
             perror("poll");
             exit(1);
         }
@@ -103,6 +108,38 @@ int main() {
                         perror("accept");
                     else {
                         addToPFDS(&pfds, newfd, &fdCount, &fdSize);
+                        std::cout << "New connection from "
+                        << inet_ntop(remoteAddr.ss_family,
+                                    getInAddr(reinterpret_cast<struct sockaddr *>(&remoteAddr)),
+                                    remoteIP,
+                                    INET6_ADDRSTRLEN)
+                        << " on socket " << newfd << std::endl;
+                    }
+                }
+                else {
+                    //a regular client
+                    int senderFD = pfds[i].fd;
+                    int nbytes = recv(senderFD, buf, sizeof buf, 0);
+
+                    if (nbytes <= 0) {
+                        //error or closed connection
+                        if (nbytes == 0)
+                            std::cerr << "socket " << senderFD << " hung up\n";
+                        if (nbytes < 0)
+                            perror("recv");
+                        close(senderFD);
+                        delFromPFDS(pfds, i, &fdCount);
+                    }
+                    else {
+                        // good data
+
+                        for (int j = 0; j < fdCount; j++) {
+                            int destFD = pfds[i].fd;
+                            if (destFD != listener && destFD != senderFD) {
+                                if (send(destFD, buf, nbytes, 0) != 0)
+                                    perror("send");
+                            }
+                        }
                     }
                 }
             }
