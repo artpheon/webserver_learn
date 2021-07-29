@@ -7,13 +7,14 @@ class Server {
     private:
         int     getListener(const std::string& port);
         int     listener;
-        struct pollfd*      pfds;
+
         Server();
     public:
         Server(const std::string& port);
         ~Server();
         Server(const Server&);
         Server& operator=(const Server&);
+        int    acceptConnection();
 };
 
 #endif

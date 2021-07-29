@@ -3,15 +3,15 @@
 Webserver::Webserver() 
     : servers()
     , servNums(0)
+    , pfds(nullptr)
     { std::cout << "Webserver started..." << std::endl; }
 
-Webserver::Webserver(int num)
-    : servers()
-    , servNums(num)
-    { std::cout << "Webserver started..." << std::endl; }
-
-Webserver::~Webserver()
-    { std::cout << "Webserver stopped..." << std::endl; }
+Webserver::~Webserver() {
+    std::cout << "Webserver stopped..." << std::endl;
+    for (auto x : this->servers) {
+        delete x;
+    }    
+}
 
 Webserver::Webserver(const Webserver& ws) {
     *this = ws;
@@ -20,6 +20,7 @@ Webserver::Webserver(const Webserver& ws) {
 Webserver& Webserver::operator=(const Webserver& ws) {
     if (this != &ws) {
         this->servers = ws.servers;
+        this->pfds = ws.pfds;
     }
     return *this;
 }
@@ -46,4 +47,16 @@ void*	Webserver::getInetAddress(struct sockaddr* sa) {
 
 void Webserver::addServer(const std::string& port) {
     this->servers.push_back(new Server(port));
+    this->servNums += 1;
+}
+
+int Webserver::invokeServer(int index) {
+    if (index < 0 || index > this->servNums)
+        return -1;
+    if (this->servers[index]->acceptConnection())
+        return -1;
+    return 0;
+}
+
+int     Webserver::run() {
 }

@@ -84,6 +84,7 @@ int main() {
 	socklen_t sinSize = sizeof(theirAddr);
 
 	while(1) {
+		std::cout << "waiting for connection on  port " << sockfd << std::endl;
 		newfd = accept(sockfd, reinterpret_cast<struct sockaddr*>(&theirAddr), &sinSize);
 		if (newfd == -1) {
 			perror("accept");

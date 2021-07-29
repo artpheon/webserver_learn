@@ -7,15 +7,18 @@ class Webserver {
     private:
         std::vector<Server*> servers;
         int servNums;
+        struct pollfd*      pfds;
+        void*   getInetAddress(struct sockaddr* sa);
     public:
-    Webserver();
-    Webserver(int num);
-    ~Webserver();
-    Webserver(const Webserver&);
-    Webserver& operator=(const Webserver&);
-    void    describe() const;
-    void*   getInetAddress(struct sockaddr* sa);
-    void    addServer(const std::string& port);
+        Webserver();
+        ~Webserver();
+        Webserver(const Webserver&);
+        Webserver& operator=(const Webserver&);
+        void    describe() const;
+        void    addServer(const std::string& port);
+        int     run();
+        int     invokeServer(int index);
+
 };
 
 #endif

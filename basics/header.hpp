@@ -8,6 +8,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
-#include <errno.h>
+#include <cstring>
+#include <cerrno>
 
 #endif

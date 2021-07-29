@@ -134,7 +134,7 @@ int main() {
                         // good data
 
                         for (int j = 0; j < fdCount; j++) {
-                            int destFD = pfds[i].fd;
+                            int destFD = pfds[j].fd;
                             if (destFD != listener && destFD != senderFD) {
                                 if (send(destFD, buf, nbytes, 0) != 0)
                                     perror("send");

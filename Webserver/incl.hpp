@@ -8,6 +8,7 @@
 # include <limits>
 # include <cstdlib>
 # include <cerrno>
+# include <cstring>
 
 # include <map>
 # include <set>
