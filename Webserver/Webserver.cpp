@@ -61,8 +61,64 @@ int Webserver::invokeServer(int index) {
 }
 
 void    Webserver::setPFD() {
-    this->pfds = new PollFD(this->count);
+    this->pfds = new PollFD(this->count, this->count);
     this->pfds->fillServersFDs(this->servers);
+}
+
+void    Webserver::serverForever() {
+    return ;
+    // for(;;) {
+    //     int pollCount = poll(this->pfds, fdCount, -1);
+    //     if (pollCount == -1) {
+    //         perror("poll");
+    //         exit(1);
+    //     }
+    //     for (int i = 0; i < fdCount; i++) {
+    //         if (pfds[i].revents & POLLIN) { //if its ready to read
+    //             if (pfds[i].fd == listener) { // if it was listener
+    //                 addrLen = sizeof(remoteAddr);
+    //                 newfd = accept(listener, reinterpret_cast<struct sockaddr*>(&remoteAddr), &addrLen);
+    //                 if (newfd == -1)
+    //                     perror("accept");
+    //                 else {
+    //                     addToPFDS(&pfds, newfd, &fdCount, &fdSize);
+    //                     std::cout << "New connection from "
+    //                     << inet_ntop(remoteAddr.ss_family,
+    //                                 getInAddr(reinterpret_cast<struct sockaddr *>(&remoteAddr)),
+    //                                 remoteIP,
+    //                                 INET6_ADDRSTRLEN)
+    //                     << " on socket " << newfd << std::endl;
+    //                 }
+    //             }
+    //             else {
+    //                 //a regular client
+    //                 int senderFD = pfds[i].fd;
+    //                 int nbytes = recv(senderFD, buf, sizeof buf, 0);
+
+    //                 if (nbytes <= 0) {
+    //                     //error or closed connection
+    //                     if (nbytes == 0)
+    //                         std::cerr << "socket " << senderFD << " hung up\n";
+    //                     if (nbytes < 0)
+    //                         perror("recv");
+    //                     close(senderFD);
+    //                     delFromPFDS(pfds, i, &fdCount);
+    //                 }
+    //                 else {
+    //                     // good data
+
+    //                     for (int j = 0; j < fdCount; j++) {
+    //                         int destFD = pfds[j].fd;
+    //                         if (destFD != listener && destFD != senderFD) {
+    //                             if (send(destFD, buf, nbytes, 0) != 0)
+    //                                 perror("send");
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 
@@ -71,6 +127,7 @@ int     Webserver::run() {
         addServer("8080");
         addServer("3490");
         setPFD();
+        serverForever();
     }
     catch(std::exception& e) {
         (void)e;

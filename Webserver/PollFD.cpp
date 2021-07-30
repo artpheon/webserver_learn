@@ -1,9 +1,9 @@
 #include "PollFD.hpp"
 
-PollFD::PollFD(int size)
-    : count(0)
+PollFD::PollFD(int count, int size)
+    : count(count)
     , size(size)
-    , pfds(size) {}
+    , pfds(new pollfd[size]) {}
 
 PollFD::~PollFD() {}
 
@@ -20,10 +20,10 @@ PollFD::PollFD(const PollFD& rhs) {
     *this = rhs;
 }
 
-const pollfd_t& PollFD::index(int i) const { return this->pfds[i]; }
+const pollfd& PollFD::index(int i) const { return this->pfds[i]; }
 
 void    PollFD::fillServersFDs(std::vector<Server*> servers) {
-    for (int i = 0; i < this->size; i++) {
+    for (int i = 0; i < this->count; i++) {
         this->pfds[i].fd = servers[i]->getListener();
         this->pfds[i].events = POLLIN;
     }
@@ -31,8 +31,13 @@ void    PollFD::fillServersFDs(std::vector<Server*> servers) {
 
 void    PollFD::addPollFD(int newFD) {
     if (this->count == this->size) {
+        pollfd* tmp = new pollfd[this->size * 2];
+        for (int i = 0; i < this->size; i++) {
+            tmp[i] = this->pfds[i];
+        }
+        delete [] this->pfds;
+        this->pfds = tmp;
         this->size *= 2;
-        this->pfds.resize(this->size);
     }
     this->pfds[this->count].fd = newFD;
     this->pfds[this->count].events = POLLIN;

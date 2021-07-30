@@ -20,6 +20,7 @@ class Webserver {
         
         void    addServer(const std::string& port);
         void    setPFD();
+        void    serverForever();
         int     run();
 
 };
