@@ -48,3 +48,7 @@ void    PollFD::delPollFD(int i) {
     this->pfds[i] = this->pfds[this->count - 1];
     this->count -= 1;
 }
+
+pollfd* PollFD::getInnerPfds() { return this->pfds; }
+int     PollFD::getCount() { return this->count; }
+int     PollFD::getSize() { return this->size; }

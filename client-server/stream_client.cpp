@@ -8,8 +8,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-
-#define PORT "3490"
 #define MAX_DATA_SIZE 100
 
 
@@ -27,15 +25,17 @@ int main(int argc, char *argv[]) {
     int rval;
     char s[INET6_ADDRSTRLEN];
 
-    if (argc != 2) {
-        std::cerr << "usage: client hostname\n";
+    if (argc < 2 || argc > 3) {
+        std::cerr << "usage: ./client hostname [port]\n";
         return 1;
     }
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-
-    rval = getaddrinfo(argv[1], PORT, &hints, &servinfo);
+    if (argc == 3)
+        rval = getaddrinfo(argv[1], argv[2], &hints, &servinfo);
+    else
+        rval = getaddrinfo(argv[1], "80", &hints, &servinfo);
     if (rval) {
         std::cerr << "getaddrinfo failed:" << gai_strerror(rval);
         return 1;

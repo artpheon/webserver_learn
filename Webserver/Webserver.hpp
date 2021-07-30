@@ -17,12 +17,18 @@ class Webserver {
         Webserver& operator=(const Webserver&);
         void    describe() const;
         int     invokeServer(int index);
-        
-        void    addServer(const std::string& port);
+        void    addServer(const std::string& port, const std::string& name = "N/A");
         void    setPFD();
         void    serverForever();
-        int     run();
 
+        class WebservExceptServFailed: public std::exception {
+            private:
+                std::string& port;
+                std::string& name;
+            public:
+                WebservExceptServFailed(std::string& port, std::string& name);
+                virtual const char* what() const throw();
+        };
 };
 
 #endif

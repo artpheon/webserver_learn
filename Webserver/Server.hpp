@@ -5,12 +5,15 @@
 
 class Server {
 	private:
-		int     getListenerSocket(const std::string& port);
 		int     listener;
+        const std::string& port;
+        const std::string& name;
 
+		int     getListenerSocket(const std::string& port);
+        
 		Server();
 	public:
-		Server(const std::string& port);
+		Server(const std::string& port, const std::string& name);
 		~Server();
 		Server(const Server&);
 		Server& operator=(const Server&);

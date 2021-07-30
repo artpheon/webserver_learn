@@ -43,26 +43,25 @@ int	Server::getListenerSocket(const std::string& port) {
 	return sockfd;
 }
 
-Server::Server(const std::string& port) {
+Server::Server(const std::string& port, const std::string& name)
+    : listener(0)
+    , port(port)
+    , name(name) {
 	this->listener = this->getListenerSocket(port);
 	if (this->listener < 0)
-		std::cerr << "server N/A failed to build" << std::endl;
+		std::cerr << "server " << this->name << " failed to build" << std::endl;
 	else
-		std::cout << "server N/A started on port " << port << " with socketFD: " << this->listener << std::endl;
+		std::cout << "server <" << this->name << "> started on port " << this->port << " with socketFD: " << this->listener << std::endl;
 }
 
 Server::~Server() {
 	close(this->listener);
 }
 
-Server::Server(const Server& rhs) {
-	*this = rhs;
-}
+Server::Server(const Server& rhs): Server(rhs.port, rhs.name) {}
 
 Server& Server::operator=(const Server& rhs) {
-	if (this != &rhs) {
-		this->listener = rhs.listener;
-	}
+	*this = Server(rhs.port, rhs.name);
 	return *this;
 }
 

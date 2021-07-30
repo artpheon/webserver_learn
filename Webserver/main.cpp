@@ -2,7 +2,10 @@
 
 void test() {
     Webserver ws;
-    ws.run();
+    ws.addServer("8080");
+    ws.addServer("8081", "new server");
+    ws.setPFD();
+    ws.serverForever();
 }
 
 int main(int argc, char* argv[], char* envp[]) {

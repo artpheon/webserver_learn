@@ -9,6 +9,7 @@
 # include <cstdlib>
 # include <cerrno>
 # include <cstring>
+# include <exception>
 
 # include <map>
 # include <set>

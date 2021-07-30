@@ -18,6 +18,9 @@ class PollFD {
 		void    fillServersFDs(std::vector<Server*> servers);
 		void    addPollFD(int newFD);
 		void    delPollFD(int i);
+        pollfd* getInnerPfds();
+        int     getCount();
+        int     getSize();
 };
 
 #endif

@@ -47,8 +47,8 @@ void*	Webserver::getInetAddress(struct sockaddr* sa) {
 		return &(reinterpret_cast<struct sockaddr_in6*>(sa)->sin6_addr);
 }
 
-void Webserver::addServer(const std::string& port) {
-    this->servers.push_back(new Server(port));
+void Webserver::addServer(const std::string& port, const std::string& name) {
+    this->servers.push_back(new Server(port, name));
     this->count += 1;
 }
 
@@ -66,73 +66,49 @@ void    Webserver::setPFD() {
 }
 
 void    Webserver::serverForever() {
-    return ;
-    // for(;;) {
-    //     int pollCount = poll(this->pfds, fdCount, -1);
-    //     if (pollCount == -1) {
-    //         perror("poll");
-    //         exit(1);
-    //     }
-    //     for (int i = 0; i < fdCount; i++) {
-    //         if (pfds[i].revents & POLLIN) { //if its ready to read
-    //             if (pfds[i].fd == listener) { // if it was listener
-    //                 addrLen = sizeof(remoteAddr);
-    //                 newfd = accept(listener, reinterpret_cast<struct sockaddr*>(&remoteAddr), &addrLen);
-    //                 if (newfd == -1)
-    //                     perror("accept");
-    //                 else {
-    //                     addToPFDS(&pfds, newfd, &fdCount, &fdSize);
-    //                     std::cout << "New connection from "
-    //                     << inet_ntop(remoteAddr.ss_family,
-    //                                 getInAddr(reinterpret_cast<struct sockaddr *>(&remoteAddr)),
-    //                                 remoteIP,
-    //                                 INET6_ADDRSTRLEN)
-    //                     << " on socket " << newfd << std::endl;
-    //                 }
-    //             }
-    //             else {
-    //                 //a regular client
-    //                 int senderFD = pfds[i].fd;
-    //                 int nbytes = recv(senderFD, buf, sizeof buf, 0);
+    char buf[1024] = {0};
+    int sender = -1, nbytes = -1, pollCount = -1;
+    struct sockaddr_storage them;
+    socklen_t len = sizeof(them);
 
-    //                 if (nbytes <= 0) {
-    //                     //error or closed connection
-    //                     if (nbytes == 0)
-    //                         std::cerr << "socket " << senderFD << " hung up\n";
-    //                     if (nbytes < 0)
-    //                         perror("recv");
-    //                     close(senderFD);
-    //                     delFromPFDS(pfds, i, &fdCount);
-    //                 }
-    //                 else {
-    //                     // good data
-
-    //                     for (int j = 0; j < fdCount; j++) {
-    //                         int destFD = pfds[j].fd;
-    //                         if (destFD != listener && destFD != senderFD) {
-    //                             if (send(destFD, buf, nbytes, 0) != 0)
-    //                                 perror("send");
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-}
-
-
-int     Webserver::run() {
-    try {
-        addServer("8080");
-        addServer("3490");
-        setPFD();
-        serverForever();
+    for(;;) {
+        pollCount = poll(pfds->getInnerPfds(), pfds->getCount(), -1);
+        if (pollCount == -1) {
+            perror("poll");
+            exit(1);
+        }
+        for (int i = 0; i < pfds->getCount(); i++) {
+            if (pfds->index(i).revents & POLLIN) { //if its ready to read
+                sender = accept(pfds->index(i).fd, reinterpret_cast<struct sockaddr*>(&them), &len);
+                nbytes = recv(sender, buf, sizeof(buf) - 1, 0);
+                if (nbytes <= 0) {
+                    //error or closed connection
+                    if (nbytes == 0)
+                        std::cerr << "socket " << sender << " hung up\n";
+                    if (nbytes < 0)
+                        perror("recv");
+                    close(sender);
+                }
+                else {
+                    buf[nbytes] = '\0';
+                    std::cout << "We got a message from socket " << sender
+                    << " with contents:\n" << buf << std::endl;
+                    // good data
+                    // if (send(destFD, buf, nbytes, 0) != 0)
+                    //     perror("send");
+                    //std::string buffer_reply = "Hello from the outside!\n";
+                    //if (send(sender, buffer_reply.c_str(), buffer_reply.size(), 0))
+                    //   perror("send");
+                    close(sender);
+                }
+            }
+        }
     }
-    catch(std::exception& e) {
-        (void)e;
-        std::cerr << "Error occurred while running the server\n";
-        return 1;
-    }
-    return 0;
+} // END serverForever
+
+Webserver::WebservExceptServFailed::WebservExceptServFailed(std::string& port, std::string& name) : port(port), name(name) {}
+
+const char* Webserver::WebservExceptServFailed::what() const throw() {
+    std::string msg = "Server " + this->name + " on port " + this->port + " was not created\n";
+    return msg.c_str();
 }
