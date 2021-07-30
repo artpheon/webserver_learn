@@ -2,22 +2,25 @@
 # define WEBSERVER_HPP
 # include "incl.hpp"
 # include "Server.hpp"
+# include "PollFD.hpp"
 
 class Webserver {
     private:
         std::vector<Server*> servers;
-        int servNums;
-        struct pollfd*      pfds;
-        void*   getInetAddress(struct sockaddr* sa);
+        PollFD*     pfds;
+        int         count;
+        void*       getInetAddress(struct sockaddr* sa);
     public:
         Webserver();
         ~Webserver();
         Webserver(const Webserver&);
         Webserver& operator=(const Webserver&);
         void    describe() const;
-        void    addServer(const std::string& port);
-        int     run();
         int     invokeServer(int index);
+        
+        void    addServer(const std::string& port);
+        void    setPFD();
+        int     run();
 
 };
 

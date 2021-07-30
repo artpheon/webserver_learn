@@ -1,10 +1,7 @@
 #include "Server.hpp"
 #include "helpers.hpp"
 
-Server::Server() {
-}
-
-int	Server::getListener(const std::string& port) {
+int	Server::getListenerSocket(const std::string& port) {
 	struct addrinfo		hints, *ai, *p;
 	int		sockfd = 0;
 
@@ -47,7 +44,7 @@ int	Server::getListener(const std::string& port) {
 }
 
 Server::Server(const std::string& port) {
-	this->listener = this->getListener(port);
+	this->listener = this->getListenerSocket(port);
 	if (this->listener < 0)
 		std::cerr << "server N/A failed to build" << std::endl;
 	else
@@ -90,3 +87,5 @@ int    Server::acceptConnection() {
 	close(newFD);
 	return 0;
 }
+
+int		Server::getListener() const { return this->listener; }

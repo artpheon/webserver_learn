@@ -2,15 +2,17 @@
 
 Webserver::Webserver() 
     : servers()
-    , servNums(0)
     , pfds(nullptr)
+    , count(0)
     { std::cout << "Webserver started..." << std::endl; }
 
 Webserver::~Webserver() {
     std::cout << "Webserver stopped..." << std::endl;
     for (auto x : this->servers) {
         delete x;
-    }    
+    }
+    if (pfds)
+        delete this->pfds;
 }
 
 Webserver::Webserver(const Webserver& ws) {
@@ -47,16 +49,33 @@ void*	Webserver::getInetAddress(struct sockaddr* sa) {
 
 void Webserver::addServer(const std::string& port) {
     this->servers.push_back(new Server(port));
-    this->servNums += 1;
+    this->count += 1;
 }
 
 int Webserver::invokeServer(int index) {
-    if (index < 0 || index > this->servNums)
+    if (index < 0 || index > this->count)
         return -1;
     if (this->servers[index]->acceptConnection())
         return -1;
     return 0;
 }
 
+void    Webserver::setPFD() {
+    this->pfds = new PollFD(this->count);
+    this->pfds->fillServersFDs(this->servers);
+}
+
+
 int     Webserver::run() {
+    try {
+        addServer("8080");
+        addServer("3490");
+        setPFD();
+    }
+    catch(std::exception& e) {
+        (void)e;
+        std::cerr << "Error occurred while running the server\n";
+        return 1;
+    }
+    return 0;
 }

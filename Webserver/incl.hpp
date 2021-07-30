@@ -29,5 +29,6 @@
 # include <sys/select.h>
 # include <arpa/inet.h>
 # include <netinet/in.h>
+# include <poll.h>
 
 #endif
