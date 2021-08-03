@@ -17,8 +17,10 @@ class Webserver {
         Webserver& operator=(const Webserver&);
         void    describe() const;
         int     invokeServer(int index);
-        void    addServer(const std::string& port, const std::string& name = "N/A");
+        void    addServer(const std::string& port, const std::string& root = "/", const std::string& name = "N/A");
         void    setPFD();
+
+        void    doGET(int s, const char* req, Server* serv);
         void    serverForever();
 
         class WebservExceptServFailed: public std::exception {

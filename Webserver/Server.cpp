@@ -43,10 +43,11 @@ int	Server::getListenerSocket(const std::string& port) {
 	return sockfd;
 }
 
-Server::Server(const std::string& port, const std::string& name)
+Server::Server(const std::string& port, const std::string& root, const std::string& name)
     : listener(0)
     , port(port)
-    , name(name) {
+    , name(name)
+    , root(root) {
 	this->listener = this->getListenerSocket(port);
 	if (this->listener < 0)
 		std::cerr << "server " << this->name << " failed to build" << std::endl;
@@ -58,10 +59,10 @@ Server::~Server() {
 	close(this->listener);
 }
 
-Server::Server(const Server& rhs): Server(rhs.port, rhs.name) {}
+Server::Server(const Server& rhs): Server(rhs.port, rhs.root, rhs.name) {}
 
 Server& Server::operator=(const Server& rhs) {
-	*this = Server(rhs.port, rhs.name);
+	*this = Server(rhs.port, rhs.root, rhs.name);
 	return *this;
 }
 
@@ -88,3 +89,8 @@ int    Server::acceptConnection() {
 }
 
 int		Server::getListener() const { return this->listener; }
+const   std::string& Server::getName() const { return this->name;}
+
+const   std::string& Server::getPort() const { return this->port;}
+
+const   std::string& Server::getRoot() const { return this->root;}

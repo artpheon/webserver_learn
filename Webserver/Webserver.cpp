@@ -47,8 +47,8 @@ void*	Webserver::getInetAddress(struct sockaddr* sa) {
 		return &(reinterpret_cast<struct sockaddr_in6*>(sa)->sin6_addr);
 }
 
-void Webserver::addServer(const std::string& port, const std::string& name) {
-    this->servers.push_back(new Server(port, name));
+void Webserver::addServer(const std::string& port, const std::string& root, const std::string& name) {
+    this->servers.push_back(new Server(port, root, name));
     this->count += 1;
 }
 
@@ -63,6 +63,36 @@ int Webserver::invokeServer(int index) {
 void    Webserver::setPFD() {
     this->pfds = new PollFD(this->count, this->count);
     this->pfds->fillServersFDs(this->servers);
+}
+
+void    Webserver::doGET(int s, const char* req, Server* serv) {
+    int i = 0;
+    for (; req[i] != ' '; i++) {}
+    std::string obj(req, 0, i);
+    std::string path = serv->getRoot() + obj;
+    std::cout << "GET from FD " << s << ", from server " << serv->getName() << " with path: " << path << std::endl;
+    
+    char buf[1024] = {0};
+    std::size_t rret, wret;
+    FILE* fd = fopen(obj.c_str(), "rb");
+    if (!fd)
+        return ;
+    int bytes;
+    while(!feof(fd)) {
+        if ((bytes = fread(&buf, 1, 1023, fd)) != 0)
+            send(s, buf, bytes, 0);
+        else
+            break;
+    }
+    fclose(fd);
+
+    // std::fstream fs;
+    // fs.open(obj, std::fstream::in);
+    // std::string header = "HTTP/1.1 200 OK\nContent-type: text/html\r\n\r\n";
+    // while (!fs.eof())
+    // if (send(sender, buffer_reply.c_str(), buffer_reply.size(), 0) == -1)
+    //     perror("send");
+    // close(sender);
 }
 
 void    Webserver::serverForever() {
@@ -96,10 +126,8 @@ void    Webserver::serverForever() {
                     // good data
                     // if (send(destFD, buf, nbytes, 0) != 0)
                     //     perror("send");
-                    //std::string buffer_reply = "Hello from the outside!\n";
-                    //if (send(sender, buffer_reply.c_str(), buffer_reply.size(), 0))
-                    //   perror("send");
-                    close(sender);
+                    if ((strncmp(buf, "GET", 3)) == 0)
+                        this->doGET(sender, &buf[5], this->servers[i]);
                 }
             }
         }
