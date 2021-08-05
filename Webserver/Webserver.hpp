@@ -9,6 +9,8 @@ class Webserver {
         std::vector<Server*> servers;
         PollFD*     pfds;
         int         count;
+        const std::string* OK_repl;
+        const std::string* NotFound_repl;
         void*       getInetAddress(struct sockaddr* sa);
     public:
         Webserver();
@@ -20,7 +22,9 @@ class Webserver {
         void    addServer(const std::string& port, const std::string& root = "/", const std::string& name = "N/A");
         void    setPFD();
 
-        void    doGET(int s, const char* req, Server* serv);
+        void    sendFile(int to, const char* header, std::size_t hlen, const char* file);
+        void    doGET_index(int sender);
+        void    doGET(int sender, const char* req, Server* serv);
         void    serverForever();
 
         class WebservExceptServFailed: public std::exception {
@@ -29,6 +33,10 @@ class Webserver {
                 std::string& name;
             public:
                 WebservExceptServFailed(std::string& port, std::string& name);
+                virtual const char* what() const throw();
+        };
+        class GETException: public std::exception {
+            public:
                 virtual const char* what() const throw();
         };
 };
