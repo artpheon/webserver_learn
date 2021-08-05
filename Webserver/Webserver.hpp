@@ -12,6 +12,14 @@ class Webserver {
         const std::string* OK_repl;
         const std::string* NotFound_repl;
         void*       getInetAddress(struct sockaddr* sa);
+        void    serveReq(char* buf, int to, Server* server);
+        void    sendFile(int to, const char* header, std::size_t hlen, const char* file);
+        void    doGET_index(int sender);
+        void    doGET(int sender, const char* req, Server* server);
+        void    doPOST(int sender, const char* req, Server* server);
+        void    doPUT(int sender, const char* req, Server* server);
+        void    doDELETE(int sender, const char* req, Server* server);
+        void    noneMethod(int sender, const char* req, Server* server);
     public:
         Webserver();
         ~Webserver();
@@ -19,12 +27,9 @@ class Webserver {
         Webserver& operator=(const Webserver&);
         void    describe() const;
         int     invokeServer(int index);
-        void    addServer(const std::string& port, const std::string& root = "/", const std::string& name = "N/A");
+        void    addServer(const std::string& port, const std::string& root = "./", const std::string& name = "N/A");
         void    setPFD();
 
-        void    sendFile(int to, const char* header, std::size_t hlen, const char* file);
-        void    doGET_index(int sender);
-        void    doGET(int sender, const char* req, Server* serv);
         void    serverForever();
 
         class WebservExceptServFailed: public std::exception {

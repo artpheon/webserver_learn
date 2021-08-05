@@ -15,6 +15,8 @@ Webserver::~Webserver() {
 	}
 	if (pfds)
 		delete this->pfds;
+	delete OK_repl;
+	delete NotFound_repl;
 }
 
 Webserver::Webserver(const Webserver& ws) {
@@ -83,7 +85,7 @@ void    Webserver::sendFile(int to, const char* header, std::size_t hlen, const 
 		else
 			break;
 	}
-	std::cout << "<transfer completed>" << std::endl;
+	/* rem */std::cout << "<transfer completed>" << std::endl;
 	fclose(fd);
 }
 
@@ -92,18 +94,62 @@ void    Webserver::doGET_index(int sender) {
 	close(sender);
 }
 
-void    Webserver::doGET(int sender, const char* req, Server* serv) {
+void    Webserver::doGET(int sender, const char* req, Server* server) {
 	if (*req == ' ')
 		doGET_index(sender);
 	else {
 		int i = 0;
 		for (; req[i] != ' '; i++) {}
-		std::string obj(req, 0, i);
-		std::string path = serv->getRoot() + obj;
-		std::cout << "GET from FD " << sender << ", from server " << serv->getName() << " with path: " << path << std::endl;
+		// i - end of the GET request
+		std::string file(req, 0, i);
+		file.insert(0, server->getRoot());
+		/* rem */std::cout << "GET from FD " << sender << ", from server " << server->getName() << " with path: " << file << std::endl;
 		
-		this->sendFile(sender, this->OK_repl->c_str(), this->OK_repl->size(), obj.c_str());
+		this->sendFile(sender, this->OK_repl->c_str(), this->OK_repl->size(), file.c_str());
 		close(sender);
+	}
+}
+
+void    Webserver::doPOST(int sender, const char* req, Server* server) {
+	return ;
+}
+
+void    Webserver::doPUT(int sender, const char* req, Server* server) {
+	return ;
+}
+
+void    Webserver::doDELETE(int sender, const char* req, Server* server) {
+	return ;
+}
+
+void    Webserver::noneMethod(int sender, const char* req, Server* server) {
+	return ;
+}
+
+void    Webserver::serveReq(char* buf, int sender, Server* server) {
+	try {
+		if ((strncmp(buf, "GET", 3)) == 0) {
+			this->doGET(sender, &buf[5], server);
+		}
+		else if (strncmp(buf, "POST", 4) == 0) {
+			this->doPOST(sender, &buf[6], server);
+		}
+        else if (strncmp(buf, "PUT", 3) == 0) {
+			this->doPUT(sender, &buf[5], server);
+		}
+        else if (strncmp(buf, "DELETE", 6) == 0) {
+			this->doDELETE(sender, &buf[8], server);
+		}
+        else
+            this->noneMethod(sender, buf, server);
+	}
+	catch (Webserver::GETException& e) {
+		std::cerr << e.what() << ": " << strerror(errno) << std::endl;
+		this->sendFile(sender, this->NotFound_repl->c_str(), this->NotFound_repl->size(), "404_not_found.html");
+		close(sender);
+	}
+	catch (std::exception& e) {
+		std::cerr << "Undefined error: " << e.what() << std::endl;
 	}
 }
 
@@ -133,21 +179,8 @@ void    Webserver::serverForever() {
 				}
 				else {
 					buf[nbytes] = '\0';
-					std::cout << "We got a message from socket " << sender
-					<< " with contents:\n" << buf << std::endl;
-					try {
-						if ((strncmp(buf, "GET", 3)) == 0) {
-							this->doGET(sender, &buf[5], this->servers[i]);
-						}
-					}
-					catch (Webserver::GETException& e) {
-						std::cout << e.what() << ": " << strerror(errno) << std::endl;
-						this->sendFile(sender, this->NotFound_repl->c_str(), this->NotFound_repl->size(), "404_not_found.html");
-						close(sender);
-					}
-					catch (std::exception& e) {
-						std::cout << "Undefined error: " << e.what() << std::endl;
-					}
+					/* rem */std::cout << "We got a message from socket " << sender << " with contents:\n" << buf << std::endl;
+					this->serveReq(buf, sender, this->servers[i]);
 				}
 			}
 		}
