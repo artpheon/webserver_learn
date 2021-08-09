@@ -1,5 +1,5 @@
-#include "Server.hpp"
-#include "helpers.hpp"
+#include "incl.hpp"
+
 
 int	Server::getListenerSocket(const std::string& port) {
 	struct addrinfo		hints, *ai, *p;

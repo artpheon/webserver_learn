@@ -32,4 +32,11 @@
 # include <netinet/in.h>
 # include <poll.h>
 
+# include "Webserver.hpp"
+# include "Server.hpp"
+# include "PollFD.hpp"
+# include "helpers.hpp"
+# include "Response.hpp"
+# include "HTTPRequest.hpp"
+
 #endif

@@ -1,7 +1,5 @@
 #ifndef POLLFD_HPP
 # define POLLFD_HPP
-# include "incl.hpp"
-# include "Server.hpp"
 
 class PollFD {
 	private:

@@ -1,6 +1,6 @@
 NAME	= webserv
-SRC		= main.cpp Server.cpp Webserver.cpp helpers.cpp PollFD.cpp
-INC		= Server.hpp Webserver.hpp incl.hpp helpers.hpp PollFD.hpp
+SRC		= main.cpp Server.cpp Webserver.cpp helpers.cpp PollFD.cpp Response.cpp HTTPRequest.cpp
+INC		= Server.hpp Webserver.hpp incl.hpp helpers.hpp PollFD.hpp	Response.hpp HTTPRequest.hpp
 OBS		= $(SRC:.cpp=.o)
 CC		= clang++
 FL		= --std=c++11

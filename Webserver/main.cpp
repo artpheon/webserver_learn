@@ -1,4 +1,5 @@
-#include "Webserver.hpp"
+#include "incl.hpp"
+
 
 void test() {
     Webserver ws;
