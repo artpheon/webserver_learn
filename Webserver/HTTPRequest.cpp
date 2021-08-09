@@ -55,6 +55,7 @@ HTTPRequest::HTTPRequest(const char* buf, int sender, Server* server) {
     catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
     }
+    /*
     std::cout << "Result:\nMethod: |" << this->method <<
     "|,\n Type: |" << this->type <<
     "|,\n Path: |" << this->path <<
@@ -62,21 +63,28 @@ HTTPRequest::HTTPRequest(const char* buf, int sender, Server* server) {
     "|,\n Connection: |" << this->connection << 
     "|,\n Content: |" << this->content <<
     "|,\n Length: |" << this->length <<
-    "|" << std::endl;
+    "|" << std::endl;*/
 }
 
-HTTPRequest::~HTTPRequest() {
+HTTPRequest::~HTTPRequest() {}
 
+HTTPRequest::HTTPRequest(const HTTPRequest& rhs) {
+    *this = rhs;
 }
 
-HTTPRequest::HTTPRequest(const HTTPRequest&) {
-
-}
-
-HTTPRequest& HTTPRequest::operator=(const HTTPRequest&) {
+HTTPRequest& HTTPRequest::operator=(const HTTPRequest& rhs) {
+    if (this != &rhs) {
+        this->sender = rhs->sender;
+        this->method = rhs->method;
+        this->path = rhs->path;
+        this->version = rhs->version;
+        this->type = rhs->type;
+        this->length = rhs->length;
+        this->connection = rhs->connection;
+        this->content = rhs->content;
+    }
     return *this;
 }
-
 
 const char* HTTPRequest::ExceptionInvalidRequest::what() const throw() {
     return "Request is invalid";
