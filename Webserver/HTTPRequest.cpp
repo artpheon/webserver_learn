@@ -21,13 +21,14 @@ void HTTPRequest::parseRequest(std::string& s) {
     std::vector<std::string> lines = split(s, del);
     del = " ";
     std::vector<std::string> head = split(lines[0], del);
-    this->method = head[0];
-    this->path = head[1];
-    this->version = head[2];
-    this->content = lines.back();
-    this->type = trimLastParam(lines, "Content-Type:");
-    this->length = trimLastParam(lines, "Content-Length:");
-    this->connection = trimLastParam(lines, "Connection:");
+    this->r.method = head[0];
+    this->r.path = head[1].replace(0, 1, "./www/");
+    /*   to add PATH from config */
+    this->r.version = head[2];
+    this->r.content = lines.back();
+    this->r.type = trimLastParam(lines, "Content-Type:");
+    this->r.length = trimLastParam(lines, "Content-Length:");
+    this->r.connection = trimLastParam(lines, "Connection:");
 }
 
 std::string HTTPRequest::trimLastParam(std::vector<std::string> vec, std::string toFind) {
@@ -44,7 +45,7 @@ std::string HTTPRequest::trimLastParam(std::vector<std::string> vec, std::string
 }
 
 HTTPRequest::HTTPRequest(const char* buf, int sender, Server* server) {
-    this->sender = sender;
+    this->r.sender = sender;
     std::string s(buf);
     try {
         this->parseRequest(s);
@@ -53,17 +54,8 @@ HTTPRequest::HTTPRequest(const char* buf, int sender, Server* server) {
         std::cerr << e.what() << std::endl;
     }
     catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "undefined error: " << e.what() << std::endl;
     }
-    /*
-    std::cout << "Result:\nMethod: |" << this->method <<
-    "|,\n Type: |" << this->type <<
-    "|,\n Path: |" << this->path <<
-    "|,\n Version: |" << this->version <<
-    "|,\n Connection: |" << this->connection << 
-    "|,\n Content: |" << this->content <<
-    "|,\n Length: |" << this->length <<
-    "|" << std::endl;*/
 }
 
 HTTPRequest::~HTTPRequest() {}
@@ -74,17 +66,22 @@ HTTPRequest::HTTPRequest(const HTTPRequest& rhs) {
 
 HTTPRequest& HTTPRequest::operator=(const HTTPRequest& rhs) {
     if (this != &rhs) {
-        this->sender = rhs->sender;
-        this->method = rhs->method;
-        this->path = rhs->path;
-        this->version = rhs->version;
-        this->type = rhs->type;
-        this->length = rhs->length;
-        this->connection = rhs->connection;
-        this->content = rhs->content;
+        this->r.sender = rhs.r.sender;
+        this->r.method = rhs.r.method;
+        this->r.path = rhs.r.path;
+        this->r.version = rhs.r.version;
+        this->r.type = rhs.r.type;
+        this->r.length = rhs.r.length;
+        this->r.connection = rhs.r.connection;
+        this->r.content = rhs.r.content;
     }
     return *this;
 }
+
+HTTPRequest_t& HTTPRequest::getRequest() {
+    return this->r;
+}
+
 
 const char* HTTPRequest::ExceptionInvalidRequest::what() const throw() {
     return "Request is invalid";

@@ -69,67 +69,12 @@ void    Webserver::setPFD() {
 	this->pfds->fillServersFDs(this->servers);
 }
 
-void    Webserver::sendFile(int to, const char* header, std::size_t hlen, const char* file) {
-	char buf[1024] = {0};
-	int bytes = 0;
-	FILE* fd = fopen(file, "rb");
 
-	if (!fd)
-		throw GETException();
-	send(to, header, hlen, 0);
-	while(!feof(fd)) {
-		if ((bytes = fread(buf, 1, 1023, fd)) != 0) {
-			buf[bytes] = '\0';
-			send(to, buf, bytes, 0);
-		}
-		else
-			break;
-	}
-	/* rem */std::cout << "<transfer completed>" << std::endl;
-	fclose(fd);
-}
-
-void    Webserver::doGET_index(int sender) {
-	this->sendFile(sender, this->OK_repl->c_str(), this->OK_repl->size(), "index.html");
-	close(sender);
-}
-
-void    Webserver::doGET(int sender, const char* req, Server* server) {
-	if (*req == ' ')
-		doGET_index(sender);
-	else {
-		int i = 0;
-		for (; req[i] != ' '; i++) {}
-		// i - end of the GET request
-		std::string file(req, 0, i);
-		file.insert(0, server->getRoot());
-		/* rem */std::cout << "GET from FD " << sender << ", from server " << server->getName() << " with path: " << file << std::endl;
-		
-		this->sendFile(sender, this->OK_repl->c_str(), this->OK_repl->size(), file.c_str());
-		close(sender);
-	}
-}
-
-void    Webserver::doPOST(int sender, const char* req, Server* server) {
-	return ;
-}
-
-void    Webserver::doPUT(int sender, const char* req, Server* server) {
-	return ;
-}
-
-void    Webserver::doDELETE(int sender, const char* req, Server* server) {
-	return ;
-}
-
-void    Webserver::noneMethod(int sender, const char* req, Server* server) {
-	return ;
-}
 
 void    Webserver::serveReq(const char* buf, int sender, Server* server) {
     auto req = new HTTPRequest(buf, sender, server);
     //auto res = new Response();
-    //res->respond(*req);
+    //res->respond(req->getRequest());
     delete req;
     //delete res;
 }
@@ -175,6 +120,3 @@ const char* Webserver::WebservExceptServFailed::what() const throw() {
 	return msg.c_str();
 }
 
-const char* Webserver::GETException::what() const throw() {
-	return "Wrong file name, or file is not accessible";
-}

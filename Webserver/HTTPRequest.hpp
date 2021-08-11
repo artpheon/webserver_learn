@@ -4,16 +4,20 @@
 
 class Server;
 
+typedef struct s_HTTPRequest {
+    int sender;
+    std::string method;
+    std::string path;
+    std::string version;
+    std::string type;
+    std::string length;
+    std::string connection;
+    std::string content;
+} HTTPRequest_t;
+
 class HTTPRequest {
     private:
-        int sender;
-        std::string method;
-        std::string path;
-        std::string version;
-        std::string type;
-        std::string length;
-        std::string connection;
-        std::string content;
+        HTTPRequest_t r;
 
         std::vector<std::string> split(std::string& s, std::string& delimiter);
         void parseRequest(std::string& s);
@@ -24,6 +28,7 @@ class HTTPRequest {
         ~HTTPRequest();
         HTTPRequest(const HTTPRequest&);
         HTTPRequest& operator=(const HTTPRequest&);
+        HTTPRequest_t& getRequest();
         class ExceptionInvalidRequest : public std::exception {
             public:
                 virtual const char* what() const throw(); 

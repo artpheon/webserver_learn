@@ -16,11 +16,6 @@ class Webserver {
         //
 		void    sendFile(int to, const char* header, std::size_t hlen, const char* file);
 		void    doGET_index(int sender);
-		void    doGET(int sender, const char* req, Server* server);
-		void    doPOST(int sender, const char* req, Server* server);
-		void    doPUT(int sender, const char* req, Server* server);
-		void    doDELETE(int sender, const char* req, Server* server);
-		void    noneMethod(int sender, const char* req, Server* server);
         //
 	public:
 		Webserver();
@@ -41,12 +36,6 @@ class Webserver {
 				WebservExceptServFailed(std::string& port, std::string& name);
 				virtual const char* what() const throw();
 		};
-        //
-		class GETException: public std::exception {
-			public:
-				virtual const char* what() const throw();
-		};
-        //
 };
 
 #endif
