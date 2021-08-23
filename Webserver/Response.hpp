@@ -1,7 +1,7 @@
 #ifndef RESPONSE_HPP
 # define RESPONSE_HPP
 
-class HTTPRequest;
+typedef struct s_HTTPRequest HTTPRequest_t;
 
 class Response {
     private:
@@ -16,6 +16,8 @@ class Response {
             PLAIN_
         };
         std::string contentTypes[6];
+        std::string statuses[2];
+        std::string& getFileType(const std::string& path);
         std::string& ctype(int type);
         void    sendFile(HTTPRequest_t& req);
         void    doGET_index(HTTPRequest_t& req);

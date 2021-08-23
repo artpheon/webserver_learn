@@ -73,8 +73,8 @@ void    Webserver::setPFD() {
 
 void    Webserver::serveReq(const char* buf, int sender, Server* server) {
     auto req = new HTTPRequest(buf, sender, server);
-    //auto res = new Response();
-    //res->respond(req->getRequest());
+    auto res = new Response();
+    res->respond(req->getRequest());
     delete req;
     //delete res;
 }
