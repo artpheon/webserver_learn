@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Main</title>
+  <title>FORMS</title>
   <meta name="description" content="website description" />
   <meta name="keywords" content="website keywords, website keywords" />
   <meta http-equiv="content-type" content="text/html; charset=windows-1252" />
@@ -25,10 +25,21 @@
 		width: max-content;
 		text-align: center;
 	}
-	a {
-		font-size: 20px;
-		color: black;
-	}
+    div.form {
+        width: max-content;
+        height: 100px;
+        margin: 10px auto 0 auto;
+        border: 2px dotted black;
+        background-color: azure;
+    }
+    button.back {
+        position: absolute;
+        left: 20px;
+        top: 20px;
+    }
+    .form input {
+        margin: 10px;
+    }
 
 	</style>
 </head>
@@ -38,13 +49,17 @@
 		<div id="header">
 			<div id="logo">
 				<div id="logo_text">
-				<h1>Main page</h1>
+				<h1>Forms</h1>
 				</div>
 			</div>
 		</div>
-		<p>This is a sample page for our Weberver written in C++ in accordance with C++ 98 standard.<br>Feel free to look around here.</p>
-		<a href="/forms.html">Go to FORMS</a>
-		<p>&nbsp;</p>
+        <button class="back">BACK</button>
+		<div class="form">
+            <form method="POST" enctype="multipart/form-data" action="/new">
+                <input type="text" name="task" placeholder="new">
+                <input type="submit" value="add">
+            </form>
+        </div>
 	</div>
 </body>
 </html>

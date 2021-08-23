@@ -19,8 +19,8 @@ class Response {
         std::string statuses[2];
         std::string& getFileType(const std::string& path);
         std::string& ctype(int type);
+        bool ends_with(const std::string& value, const std::string& ending);
         void    sendFile(HTTPRequest_t& req);
-        void    doGET_index(HTTPRequest_t& req);
         void doGET(HTTPRequest_t& req);
         void doPOST(HTTPRequest_t& req);
         void doPUT(HTTPRequest_t& req);

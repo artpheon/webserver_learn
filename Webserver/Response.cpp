@@ -30,6 +30,13 @@ std::string& Response::ctype(int type) {
 	return this->contentTypes[type];
 }
 
+bool Response::ends_with(const std::string& value, const std::string& ending)
+{
+    if (ending.size() > value.size())
+		return false;
+    return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
+
 std::string& Response::getFileType(const std::string& path) {
 	std::size_t dot = path.rfind('.');
 	if (dot == std::string::npos)
@@ -52,11 +59,18 @@ void    Response::sendFile(HTTPRequest_t& req) {
 	int bytes = 0;
 	FILE* fd = fopen(req.path.c_str(), "rb");
 	/* DEBUG*/
-	//std::cout << "SENDING FILE" << std::endl;
-	if (!fd)
+	std::cout << "SENDING FILE: |" << req.path << "|" << std::endl;
+	if (!fd) {
+		perror("Could not open the file");
 		this->header += req.version + " " + this->statuses[1] + "\r\nContent-type: " + this->ctype(HTML_) + "\r\n\r\n";
+		/* path to get from config file or req structure */
+		fd = fopen("/Users/hrobbin/test/Webserver/www/404_not_found.html", "rb");
+		if (!fd)
+			throw std::exception();
+	}
 	else
 		this->header += req.version + " " + this->statuses[0] + "\r\nContent-type: " + this->getFileType(req.path) + "\r\n\r\n";
+	std::cout << "HEADER:\n" << this->header << "\n"; 
 	send(req.sender, this->header.c_str(), this->header.size(), 0);
 	while(!feof(fd)) {
 		if ((bytes = fread(buf, 1, 1023, fd)) != 0) {
@@ -70,24 +84,21 @@ void    Response::sendFile(HTTPRequest_t& req) {
 	fclose(fd);
 }
 
-void    Response::doGET_index(HTTPRequest_t& req) {
-	/* DEBUG*/
-	//std::cout << "INDEX FILE REQ" << std::endl;
-	req.path += "index.html";
-	this->sendFile(req);
-}
-
 
 void    Response::doGET(HTTPRequest_t& req) {
-	if (req.path == "/")
-		doGET_index(req);
-	else {
-		this->sendFile(req);
-	}
+	std::cout << "request path was: |" << req.path << "|\n";
+	if (req.path == "./www/")
+		req.path += "index.html";
+	this->sendFile(req);
 	close(req.sender);
 }
 
-void    Response::doPOST(HTTPRequest_t& req) {}
+void    Response::doPOST(HTTPRequest_t& req) {
+	if (ends_with(req.path, "forms.html")) {
+		
+	}
+}
+
 void    Response::doPUT(HTTPRequest_t& req) {}
 void    Response::doDELETE(HTTPRequest_t& req) {}
 void    Response::noneMethod(HTTPRequest_t& req) {}
@@ -112,6 +123,7 @@ void Response::respond(HTTPRequest_t& req) {
 	}
 	catch (std::exception& e) {
 		std::cerr << "Undefined error: " << e.what() << std::endl;
+		close(req.sender);
 	}
 }
 
